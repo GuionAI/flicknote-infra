@@ -12,6 +12,6 @@ spec:
     name: flicknote-infra
   path: ./flux/redpanda/base
   prune: true
-  wait: true
+  # wait: true  # rely on healthChecks
   timeout: 10m
   targetNamespace: flicknote-infra

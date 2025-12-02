@@ -10,5 +10,5 @@ spec:
     name: flicknote-infra
   path: ./flux/redis/base
   prune: true
-  wait: true
+  # wait: true  # rely on healthChecks
   timeout: 5m
