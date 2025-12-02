@@ -13,7 +13,7 @@ spec:
   path: ./flux/redpanda/base
   prune: true
   # wait: true  # rely on healthChecks
-  timeout: 10m
+  timeout: 5m
   targetNamespace: flicknote-infra
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
