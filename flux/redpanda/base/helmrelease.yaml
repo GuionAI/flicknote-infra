@@ -34,13 +34,14 @@ spec:
     external:
       enabled: false
 
-    # Resource configuration
+    # Resource configuration - reduced for dev cluster
     resources:
       cpu:
-        cores: 1
+        cores: 0.5
       memory:
         container:
-          max: 2Gi
+          max: 1Gi
+          min: 512Mi
 
     # Storage configuration
     storage:
