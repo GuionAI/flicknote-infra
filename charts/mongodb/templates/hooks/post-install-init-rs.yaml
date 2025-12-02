@@ -1,0 +1,89 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mongodb.fullname" . }}-init-rs
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: init-rs
+    spec:
+      restartPolicy: OnFailure
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-mongodb
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for MongoDB to be ready..."
+              until mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+                echo "MongoDB not ready, waiting..."
+                sleep 5
+              done
+              echo "MongoDB is ready!"
+      containers:
+        - name: init-rs
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              echo "Attempting MongoDB replica set initialization..."
+
+              mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}:27017 --eval '
+                const rsConfig = {
+                  _id: "{{ .Values.replicaSet.name }}",
+                  members: [{ _id: 0, host: "{{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}:27017" }]
+                };
+
+                try {
+                  rs.initiate(rsConfig);
+                  print("Replica set initialized successfully");
+                } catch (e) {
+                  if (e.codeName === "AlreadyInitialized" || e.code === 23) {
+                    print("Replica set already initialized, checking status...");
+
+                    // Check if replica set is actually healthy
+                    try {
+                      const status = rs.status();
+                      if (status.ok === 1) {
+                        print("Replica set is healthy");
+                        printjson(status);
+                      }
+                    } catch (statusErr) {
+                      // rs.status() failed - config is broken, force reconfig
+                      print("Replica set config is broken, forcing reconfiguration...");
+                      rs.reconfig(rsConfig, { force: true });
+                      print("Replica set reconfigured successfully");
+                    }
+                  } else {
+                    print("Unexpected error: " + e.message);
+                    throw e;
+                  }
+                }
+
+                // Wait for primary election
+                sleep(5000);
+
+                // Show current status
+                printjson(rs.status());
+              '
+
+              echo "MongoDB replica set initialization complete!"

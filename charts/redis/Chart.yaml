@@ -1,0 +1,7 @@
+apiVersion: v2
+name: redis
+description: Simple Redis StatefulSet with AOF persistence
+type: application
+version: 0.1.0
+appVersion: "7"
+icon: https://raw.githubusercontent.com/redis/redis-io/master/public/images/redis-white.png

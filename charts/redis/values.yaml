@@ -1,0 +1,49 @@
+## Redis image
+image:
+  repository: redis
+  tag: "7"
+  pullPolicy: IfNotPresent
+
+## Redis configuration
+config:
+  ## Enable AOF persistence
+  appendonly: true
+
+## Resource limits
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "50m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+## Persistence
+persistence:
+  enabled: true
+  storageClass: local-path
+  size: 2Gi
+  accessMode: ReadWriteOnce
+
+## Service configuration
+service:
+  type: ClusterIP
+  port: 6379
+
+## Probes
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+## Node selector
+nodeSelector: {}
+
+## Tolerations
+tolerations: []
+
+## Affinity
+affinity: {}

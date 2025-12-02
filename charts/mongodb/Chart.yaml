@@ -1,0 +1,7 @@
+apiVersion: v2
+name: mongodb
+description: Simple MongoDB StatefulSet with replica set support
+type: application
+version: 0.2.0
+appVersion: "7.0"
+icon: https://raw.githubusercontent.com/mongodb/mongo/master/docs/mongodb-logo.png
