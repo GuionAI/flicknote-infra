@@ -34,14 +34,14 @@ spec:
     external:
       enabled: false
 
-    # Resource configuration - reduced for dev cluster
+    # Resource configuration - light dev workload
     resources:
       cpu:
-        cores: 0.5
+        cores: 1
+        overprovisioned: true
       memory:
         container:
-          max: 1Gi
-          min: 512Mi
+          max: 1536Mi
 
     # Storage configuration
     storage:
