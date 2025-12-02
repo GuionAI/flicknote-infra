@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "mongodb.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": post-install
+    "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "0"
 spec:
@@ -31,7 +31,7 @@ spec:
             - -c
             - |
               echo "Waiting for MongoDB to be ready..."
-              until mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+              until mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc:27017 --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
                 echo "MongoDB not ready, waiting..."
                 sleep 5
               done
@@ -47,10 +47,10 @@ spec:
               set -e
               echo "Attempting MongoDB replica set initialization..."
 
-              mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}:27017 --eval '
+              mongosh --host {{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc:27017 --eval '
                 const rsConfig = {
                   _id: "{{ .Values.replicaSet.name }}",
-                  members: [{ _id: 0, host: "{{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}:27017" }]
+                  members: [{ _id: 0, host: "{{ include "mongodb.fullname" . }}-0.{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc:27017" }]
                 };
 
                 try {
