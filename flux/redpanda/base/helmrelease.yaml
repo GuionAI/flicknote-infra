@@ -1,0 +1,63 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: redpanda
+  namespace: flicknote-infra
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: redpanda
+      version: "5.x"
+      sourceRef:
+        kind: HelmRepository
+        name: redpanda
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+    timeout: 15m
+  upgrade:
+    remediation:
+      retries: 3
+    timeout: 15m
+  values:
+    # Single node deployment - no ZooKeeper required
+    statefulset:
+      replicas: 1
+
+    # Disable TLS for easy dev access
+    tls:
+      enabled: false
+
+    # Disable external access (internal cluster only)
+    external:
+      enabled: false
+
+    # Resource configuration
+    resources:
+      cpu:
+        cores: 1
+      memory:
+        container:
+          max: 2Gi
+
+    # Storage configuration
+    storage:
+      persistentVolume:
+        enabled: true
+        size: 10Gi
+
+    # Disable SASL authentication for simplicity
+    auth:
+      sasl:
+        enabled: false
+
+    # Console UI (optional, can be disabled to save resources)
+    console:
+      enabled: false
+
+    # Listeners configuration - Kafka API on port 9092
+    listeners:
+      kafka:
+        port: 9092

@@ -1,6 +1,0 @@
-apiVersion: v2
-name: kafka
-description: Simple Kafka chart using Confluent image (KRaft mode, single instance)
-type: application
-version: 0.1.0
-appVersion: "7.7.1"

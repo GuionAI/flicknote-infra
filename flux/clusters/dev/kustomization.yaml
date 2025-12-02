@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   # Namespace created by flicknote-deploy
+  - sources.yaml
   - redis.yaml
   - mongodb.yaml
-  - kafka.yaml
+  - redpanda.yaml
