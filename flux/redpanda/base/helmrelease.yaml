@@ -47,7 +47,7 @@ spec:
     storage:
       persistentVolume:
         enabled: true
-        size: 10Gi
+        size: 5Gi
 
     # Disable SASL authentication for simplicity
     auth:
